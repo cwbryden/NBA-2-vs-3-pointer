@@ -1,0 +1,147 @@
+---
+title: "Michigan Comparison 2 or 3"
+author: "Chris Bryden"
+date: "6/22/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(reshape2)
+library(readr)
+```
+
+```{r}
+player_2_vs_3_comparison <- function(player_name, number_of_simulated_shot_attempts){
+
+# Read in the Data we will be using
+playerData <- read_csv("D:/MyShinyApp/university_of_michigan2or3_2020_roster_career_probs.csv")
+#View(playerData)
+
+# We create 2 shot objects, for a 2 point shot attempt, and a 3 point shot attempt.
+# If a player makes the shot, they will get 2 or 3 points based on what shot was attempted
+# If a player misses, they will receive 0
+shot2 <- c(2, 0)
+shot3 <- c(3, 0)
+
+# We use the DPLYR package and the FILTER function to go through the playerName column of our dataset, and when it finds the match, it filters that row. From there we use the corresponding column index to specify the statistic we need. 
+
+selectedPlayer <- filter(playerData, playerName == player_name)
+player2PtMake <- selectedPlayer[,2]
+player2PtMiss <- selectedPlayer[,3]
+player3PtMake <- selectedPlayer[,4]
+player3PtMiss <- selectedPlayer[,5]
+
+
+# 
+
+player2_prob <- c(player2PtMake, player2PtMiss)
+player3_prob <- c(player3PtMake, player3PtMiss)
+
+# Saves users simulated shot attempts as a variable we will use later
+number_of_simulated_shot_attempts <- number_of_simulated_shot_attempts
+
+
+player2samp <- sample(shot2,
+                      size = number_of_simulated_shot_attempts, 
+                      replace = TRUE, 
+                      prob = player2_prob)
+
+player3samp <- sample(shot3,
+                      size = number_of_simulated_shot_attempts,
+                      replace = TRUE,
+                      prob = player3_prob)
+
+player2cumulative <- cumsum(player2samp)
+player3cumulative <- cumsum(player3samp)
+
+#player2cumulative
+#player3cumulative
+
+simulated_shot_attempts <- seq(1, number_of_simulated_shot_attempts, by = 1)
+
+player2MaxPoints <- max(player2cumulative)
+player3MaxPoints <- max(player3cumulative)
+
+player2PointsPerShot <- max(player2cumulative)/number_of_simulated_shot_attempts
+player3PointsPerShot <-max(player3cumulative) / number_of_simulated_shot_attempts
+
+player_df <- data.frame(simulated_shot_attempts, player2cumulative, player3cumulative)
+player_df
+
+player_plot <- ggplot()+
+  geom_line(data = player_df, aes(x = simulated_shot_attempts, 
+                              y = player2cumulative,
+                              col = "2 Point Shot Attempt")) +
+  geom_line(data = player_df, aes(x = simulated_shot_attempts,
+                              y = player3cumulative,
+                              col = "3 Point Shot Attempt")) +
+  labs(title = paste("2 v. 3 Comparison For", selectedPlayer),
+       subtitle = "By 2020-21 Shooting Percentages",
+       y = "Simulated Points Scored",
+       x = "Simulated Shot Attempts",
+       color = "Shot Type") +
+  theme_minimal()
+
+player_plot
+
+}
+
+
+```
+
+
+
+
+```{r}
+player_2_vs_3_comparison("Mike Smith", 20)
+player_2_vs_3_comparison("Franz Wagner", 20)
+player_2_vs_3_comparison("Eli Brooks", 20)
+player_2_vs_3_comparison("Hunter Dickinson", 20)
+player_2_vs_3_comparison("Isaiah Livers", 20)
+player_2_vs_3_comparison("Chaundee Brown", 20)
+player_2_vs_3_comparison("Brandon Johns Jr", 20)
+player_2_vs_3_comparison("Austin Davis", 20)
+player_2_vs_3_comparison("Terrance Williams", 20)
+player_2_vs_3_comparison("Zeb Jackson", 20)
+player_2_vs_3_comparison("Jace Howard", 20)
+```
+
+
+
+```{r}
+player_2_vs_3_comparison("Mike Smith", 50)
+player_2_vs_3_comparison("Franz Wagner", 50)
+player_2_vs_3_comparison("Eli Brooks", 50)
+player_2_vs_3_comparison("Hunter Dickinson", 50)
+player_2_vs_3_comparison("Isaiah Livers", 50)
+player_2_vs_3_comparison("Chaundee Brown", 50)
+player_2_vs_3_comparison("Brandon Johns Jr", 50)
+player_2_vs_3_comparison("Austin Davis", 50)
+player_2_vs_3_comparison("Terrance Williams", 50)
+player_2_vs_3_comparison("Zeb Jackson", 50)
+player_2_vs_3_comparison("Jace Howard", 50)
+```
+
+
+
+
+
+3 point statistics for Cade Cunningham will be overestimated as he was shooting from a college 3 point line where Jalen Green was shooting from an NBA 3 point line.
+
+```{r}
+player_2_vs_3_comparison("Jalen Green", 20)
+player_2_vs_3_comparison("Cade Cunningham", 20)
+player_2_vs_3_comparison("Jalen Green", 100)
+player_2_vs_3_comparison("Cade Cunningham", 100)
+player_2_vs_3_comparison("Jalen Green", 500)
+player_2_vs_3_comparison("Cade Cunningham", 500)
+player_2_vs_3_comparison("Jalen Green", 1000)
+player_2_vs_3_comparison("Cade Cunningham", 1000)
+player_2_vs_3_comparison("Jalen Green", 10000)
+player_2_vs_3_comparison("Cade Cunningham", 10000)
+```
+
+
